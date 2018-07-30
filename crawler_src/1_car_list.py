@@ -43,15 +43,14 @@ def obtain_model_and_joint(db_manager: DBManger):
                 pass
             detial_json['url'] = pre_url + model['url_slug']
             model_json[model_name] = detial_json
-        db_manager.insert(col_name='car_urls', doc={make: model_json})
+        db_manager.insert(col_name='car_urls', doc={'make': make, 'models': model_json})
 
 
 if __name__ == '__main__':
-    configparser = configparser.ConfigParser()
-    configparser.read(filenames='../config.ini', encoding='utf8')
-    host = configparser['mongodb']['host']
-    port = configparser['mongodb']['port']
-    database = configparser['mongodb']['database']
+    cp = configparser.ConfigParser()
+    cp.read(filenames='../config.ini', encoding='utf8')
+    host = cp['mongodb']['host']
+    port = cp['mongodb']['port']
+    database = cp['mongodb']['database']
     db_manager = DBManger(host=host, port=int(port), db=database)
     obtain_model_and_joint(db_manager=db_manager)
-    print(1)
