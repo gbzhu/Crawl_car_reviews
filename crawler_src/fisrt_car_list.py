@@ -52,6 +52,6 @@ def obtain_model_and_joint(db_manager: DBManger, makes: list, pre_api: str, suf_
 
 if __name__ == '__main__':
     host, port, database, makes, pre_api, suf_api, pre_url = config_parser('../config.ini')
-    makes = makes.aplit(',')
+    makes = makes.split(',')
     db_manager = DBManger(host=host, port=port, db=database)
     obtain_model_and_joint(db_manager=db_manager, makes=makes, pre_api=pre_api, suf_api=suf_api, pre_url=pre_url)
