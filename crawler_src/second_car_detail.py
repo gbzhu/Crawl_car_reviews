@@ -9,7 +9,14 @@ def get_review(url: str):
         context = resp.read().decode('utf8')
         bs4_obj = BeautifulSoup(context, 'html5lib')
         # this can get all result
-        a_tag = bs4_obj.find_all('a', class_='gtm-link gtm-article-title')
+        href_a_tags = bs4_obj.find_all('a', class_='gtm-link gtm-article-title')
+        text_p_tags = bs4_obj.find_all('p', class_='col-24 serif-2 f18 lh22 text-nero mb4 mb5-dk')
+        for index in range(len(href_a_tags)):
+            href = href_a_tags[index]['href']
+            title = href_a_tags[index].get_text()
+            description = text_p_tags[index].get_text()
+
+        print(1)
 
 
 if __name__ == '__main__':
