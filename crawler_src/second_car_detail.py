@@ -4,7 +4,7 @@ from urllib import request
 from bs4 import BeautifulSoup
 
 
-def get_review(url: str):
+def get_review(make_model: str, url: str, target_website: str, db_manager: DBManger):
     with request.urlopen(url) as resp:
         context = resp.read().decode('utf8')
         bs4_obj = BeautifulSoup(context, 'html5lib')
@@ -13,14 +13,18 @@ def get_review(url: str):
         text_p_tags = bs4_obj.find_all('p', class_='col-24 serif-2 f18 lh22 text-nero mb4 mb5-dk')
         for index in range(len(href_a_tags)):
             href = href_a_tags[index]['href']
+            href = target_website + href
             title = href_a_tags[index].get_text()
-            description = text_p_tags[index].get_text()
 
-        print(1)
+            print(make_model + " : " + title)
+
+            description = text_p_tags[index].get_text()
+            db_manager.update(col_name='car_details', query={'make_model': make_model}, update={'$addToSet': {
+                'cars': {title: {'description': description, 'href': href}}}}, upsert=True)
 
 
 if __name__ == '__main__':
-    host, port, database, makes, pre_api, suf_api, pre_url = config_parser('../config.ini')
+    host, port, database, target_website, _, pre_api, suf_api, pre_url = config_parser('../config.ini')
     db_manager = DBManger(host, port, database)
     res = db_manager.find_all(col_name='car_urls')
     for re in res:
@@ -28,4 +32,4 @@ if __name__ == '__main__':
         models = re['models']
         for model in models:
             url = models[model]['url']
-            get_review(url)
+            get_review(make + ' / ' + model, url, target_website, db_manager)

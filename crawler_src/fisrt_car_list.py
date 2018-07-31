@@ -10,11 +10,12 @@ def config_parser(filepath: str):
     host = cp['mongodb']['host']
     port = cp['mongodb']['port']
     database = cp['mongodb']['database']
+    target_website = cp['car_info']['target_website']
     makes = cp['car_info']['makes']
     pre_api = cp['car_info']['pre_api']
     suf_api = cp['car_info']['suf_api']
     pre_url = cp['car_info']['pre_url']
-    return host, int(port), database, makes, pre_api, suf_api, pre_url
+    return host, int(port), database, target_website, makes, pre_api, suf_api, pre_url
 
 
 def joint_url(make: str, pre_api: str, suf_api: str):
@@ -51,7 +52,7 @@ def obtain_model_and_joint(db_manager: DBManger, makes: list, pre_api: str, suf_
 
 
 if __name__ == '__main__':
-    host, port, database, makes, pre_api, suf_api, pre_url = config_parser('../config.ini')
+    host, port, database, _, makes, pre_api, suf_api, pre_url = config_parser('../config.ini')
     makes = makes.split(',')
     db_manager = DBManger(host=host, port=port, db=database)
     obtain_model_and_joint(db_manager=db_manager, makes=makes, pre_api=pre_api, suf_api=suf_api, pre_url=pre_url)
