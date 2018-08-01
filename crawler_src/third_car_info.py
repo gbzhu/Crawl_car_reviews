@@ -66,14 +66,19 @@ def obtain_ng_info(ng_url: str):
     bs4_obj = BeautifulSoup(context, 'lxml')
 
     div_tag = bs4_obj.find('div',
-                          class_='embedded-article-article flex-grow mb6-nm mb4 f16 f18-dk lh25 lh28-tb lh30-dk serif text-nero ph20 ph0-nm')
+                           class_='embedded-article-article flex-grow mb6-nm mb4 f16 f18-dk lh25 lh28-tb lh30-dk serif text-nero ph20 ph0-nm')
 
-    h3_tags = div_tag.find_all('h3')
+    div_title_tag = div_tag.children
+    index = 0
+    while index < len(div_title_tag):
+        h3_tags = div_title_tag[index].find('h3')
+        p_tag = div_title_tag[index].find('p')
 
     return 1
 
 
 if __name__ == '__main__':
+
     # host, port, database, target_website, _, pre_api, suf_api, pre_url = config_parser('../config.ini')
     # db_manager = DBManger(host, port, database)
     url = 'https://www.caranddriver.com/reviews/2018-acura-nsx-in-depth-model-review'
