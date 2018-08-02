@@ -17,7 +17,7 @@ class DBManger:
         self.client = MongoClient(host=host, port=port)
         self.db = self.client[db]
 
-    def insert(self, col_name: str, doc: json):
+    def insert(self, col_name: str, doc):
         return self.db[col_name].insert(doc)
 
     def remove(self):
@@ -26,7 +26,7 @@ class DBManger:
     def find_all(self, col_name: str):
         return self.db[col_name].find()
 
-    def find_by_condition(self, col_name: str, condition: json):
+    def find_by_condition(self, col_name: str, condition):
         return self.db[col_name].find(condition)
 
     def update(self, col_name, query, update, upsert=False, multi=False):

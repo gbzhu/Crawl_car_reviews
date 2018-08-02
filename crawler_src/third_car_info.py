@@ -5,81 +5,90 @@ from bs4 import BeautifulSoup
 
 
 def obtain_car_info(url: str, target_website: str):
-    ng_review = {}
+    reviews = {}
     finish_url = []
     if url[-6:] != 'review':
         url = url.split('-review-')[0] + '-review'
     if url in finish_url:
         return
-    ng_url = {}
     with urlopen(url) as resp:
         context = resp.read().decode('utf-8')
     bs4_obj = BeautifulSoup(context, 'lxml')
-
-    ov_tag = bs4_obj.find('div',
-                          class_='embedded-article-article flex-grow mb6-nm mb4 f16 f18-dk lh25 lh28-tb lh30-dk serif text-nero ph20 ph0-nm')
-    overview = []
-    title, detail = [], []
-    h3_tags = ov_tag.find_all('h3')
-    p_tags = ov_tag.find_all('p')
-    for h3_tag in h3_tags:
-        h3 = h3_tag.get_text().replace('\n', '').strip()
-        title.append(h3)
-    p_info = ''
-    for p_tag in p_tags:
-        p = p_tag.get_text().replace('\n', '').strip()
-        p_info += p
-        if p == '' and p_info not in detail:
-            detail.append(p_info)
-            p_info = ''
-    for index in range(len(title)):
-        overview.append({title[index]: detail[index]})
-
     ng_parent = bs4_obj.find('div',
                              class_='w100p w180-dk w300-tb hauto border-top-dotted-tb border-gainsboro pb1 pt4-tb block mt4 mt2-dk mb5-dk hide-tb ph20 ph0-nm mr8-dk')
 
     ngs = ng_parent.find_all('a', class_='gtm-link gtm-article-page')
+    ng_url = {}
+    ng_order = []
     for ng_tag in ngs:
         href = ng_tag['href']
         href = target_website + href
         ng = str(ng_tag.get_text()).replace('\n', '').strip()
+        ng_order.append(ng)
         ng_url[ng] = href
 
-    for key, value in ng_url:
-        if key == 'Overview':
-            continue
-        ng_info = obtain_ng_info(ng_url=value)
-
+    for ng in ng_order:
+        if ng == 'Overview':
+            ng_info = obtain_ng_info(bs4_obj)
+        else:
+            with urlopen(ng_url[ng]) as resp_2:
+                context_2 = resp_2.read().decode('utf-8')
+            bs4_obj_2 = BeautifulSoup(context_2, 'lxml')
+            ng_info = obtain_ng_info(bs4_obj_2)
+        reviews[ng] = ng_info
     finish_url.append(url)
+    return reviews
 
 
-def obtain_ng_info(ng_url: str):
-    """
-    obtain info of special ng
-    :param ng_url:
-    :return: a list contains json info
-    """
-    ret_detail = []
-
-    with urlopen(url) as resp:
-        context = resp.read().decode('utf-8')
-    bs4_obj = BeautifulSoup(context, 'lxml')
-
+def obtain_ng_info(bs4_obj: BeautifulSoup):
+    title_info = []
     div_tag = bs4_obj.find('div',
                            class_='embedded-article-article flex-grow mb6-nm mb4 f16 f18-dk lh25 lh28-tb lh30-dk serif text-nero ph20 ph0-nm')
 
-    div_title_tag = div_tag.children
+    div_title_tag = div_tag.contents
     index = 0
+    title, info = '', ''
     while index < len(div_title_tag):
-        h3_tags = div_title_tag[index].find('h3')
-        p_tag = div_title_tag[index].find('p')
 
-    return 1
+        h3_tag = div_title_tag[index].find('h3')
+        p_tag = div_title_tag[index].find('p')
+        if h3_tag is not None:
+            title = h3_tag.get_text().replace('\n', '').strip()
+            if p_tag is None:
+                pass
+            else:
+                info = p_tag.get_text().replace('\n', '').strip()
+        else:
+            if p_tag is None or p_tag.get_text() == '':
+                index += 1
+                continue
+            else:
+                info += p_tag.get_text().replace('\n', '').strip()
+        flag = True
+        for num in range(len(title_info)):
+            if title in title_info[num].keys():
+                title_info[num] = {title: info}
+                flag = False
+                break
+        if flag:
+            title_info.append({title: info})
+
+        index += 1
+    return title_info
 
 
 if __name__ == '__main__':
-
-    # host, port, database, target_website, _, pre_api, suf_api, pre_url = config_parser('../config.ini')
-    # db_manager = DBManger(host, port, database)
-    url = 'https://www.caranddriver.com/reviews/2018-acura-nsx-in-depth-model-review'
-    obtain_car_info(url, 'https://www.caranddriver.com')
+    host, port, database, target_website, _, pre_api, suf_api, pre_url = config_parser('../config.ini')
+    db_manager = DBManger(host, port, database)
+    car_details = db_manager.find_by_condition(col_name='car_details', condition={'flag': 'false'})
+    for car_detail in car_details:
+        make_model = car_detail['make_model']
+        cars = car_detail['cars']
+        for car in cars:
+            for key, value in car.items():
+                brand = key
+                href = value['href']
+                reviews = obtain_car_info(href, 'https://www.caranddriver.com')
+                reviews['car_info'] = make_model + " / " + brand
+                db_manager.insert(col_name='car_reviews', doc=reviews)
+        db_manager.update(col_name='car_details', query={'make_model': make_model}, update={'$set': {'flag': 'true'}})
