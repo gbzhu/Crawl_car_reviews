@@ -83,12 +83,16 @@ if __name__ == '__main__':
     car_details = db_manager.find_by_condition(col_name='car_details', condition={'flag': 'false'})
     for car_detail in car_details:
         make_model = car_detail['make_model']
+
         cars = car_detail['cars']
         for car in cars:
             for key, value in car.items():
                 brand = key
+
+                print(make_model + " : " + brand)
+
                 href = value['href']
                 reviews = obtain_car_info(href, 'https://www.caranddriver.com')
                 reviews['car_info'] = make_model + " / " + brand
-                db_manager.insert(col_name='car_reviews', doc=reviews)
+                db_manager.insert(col_name='car_reviews', doc=reviews, check_keys=False)
         db_manager.update(col_name='car_details', query={'make_model': make_model}, update={'$set': {'flag': 'true'}})

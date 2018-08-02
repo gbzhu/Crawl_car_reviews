@@ -17,8 +17,8 @@ class DBManger:
         self.client = MongoClient(host=host, port=port)
         self.db = self.client[db]
 
-    def insert(self, col_name: str, doc):
-        return self.db[col_name].insert(doc)
+    def insert(self, col_name: str, doc, check_keys=True):
+        return self.db[col_name].insert(doc, check_keys=check_keys)
 
     def remove(self):
         pass
