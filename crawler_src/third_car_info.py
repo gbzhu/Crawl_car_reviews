@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 def obtain_car_info(url: str, target_website: str):
     reviews = {}
     finish_url = []
-    if url[-6:] != 'review':
+    if 'page' in url:
         url = url.split('-review-')[0] + '-review'
     if url in finish_url:
         return
@@ -28,7 +28,7 @@ def obtain_car_info(url: str, target_website: str):
         ng_url[ng] = href
 
     for ng in ng_order:
-        if ng == 'Overview':
+        if 'Overview' in ng:
             ng_info = obtain_ng_info(bs4_obj)
         else:
             with urlopen(ng_url[ng]) as resp_2:
