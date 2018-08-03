@@ -16,8 +16,11 @@ def obtain_car_info(url: str, target_website: str):
     bs4_obj = BeautifulSoup(context, 'lxml')
     ng_parent = bs4_obj.find('div',
                              class_='w100p w180-dk w300-tb hauto border-top-dotted-tb border-gainsboro pb1 pt4-tb block mt4 mt2-dk mb5-dk hide-tb ph20 ph0-nm mr8-dk')
-
-    ngs = ng_parent.find_all('a', class_='gtm-link gtm-article-page')
+    try:
+        ngs = ng_parent.find_all('a', class_='gtm-link gtm-article-page')
+    except AttributeError as e:
+        print(e)
+        return None
     ng_url = {}
     ng_order = []
     for ng_tag in ngs:
@@ -93,6 +96,8 @@ if __name__ == '__main__':
 
                 href = value['href']
                 reviews = obtain_car_info(href, 'https://www.caranddriver.com')
+                if reviews is None:
+                    continue
                 reviews['car_info'] = make_model + " / " + brand
                 db_manager.insert(col_name='car_reviews', doc=reviews, check_keys=False)
         db_manager.update(col_name='car_details', query={'make_model': make_model}, update={'$set': {'flag': 'true'}})
