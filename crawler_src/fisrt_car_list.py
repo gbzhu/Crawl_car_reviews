@@ -1,7 +1,7 @@
 from urllib import request
 import json
 import configparser
-from crawler_src.db_manager import DBManger
+from db_manager.db_manager import DBManger
 
 
 def config_parser(filepath: str):

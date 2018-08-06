@@ -1,4 +1,4 @@
-from crawler_src.db_manager import DBManger
+from db_manager.db_manager import DBManger
 from crawler_src.fisrt_car_list import config_parser
 from urllib import request
 from urllib import error
