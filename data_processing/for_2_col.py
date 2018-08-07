@@ -6,6 +6,7 @@ def process_2_col():
 
 
 def main():
+    DBManger.find_all(col_name='car_reviews')
     pass
 
 
